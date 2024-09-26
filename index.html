@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engine Dashboard</title>
+    <style>
+        body {
+            background-color: #16181f;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+            gap: 80px;
+        }
+
+        .dashboard {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 80%;
+            padding: 20px;
+        }
+
+        .gauge-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            text-align: center;
+        }
+
+        .gauge-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle at center, #003, #01749b, #000);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .gauge {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .value {
+            position: absolute;
+            width: 100%;
+            top: 55%;
+            font-size: 38px;
+            font-weight: bold;
+            color: #00FFFF;
+        }
+
+        .label {
+            position: absolute;
+            width: 100%;
+            top: 80%;
+            font-size: 18px;
+            color: #00FFFF;
+        }
+
+        .unit {
+            position: absolute;
+            width: 100%;
+            top: 70%;
+            font-size: 15px;
+            color: #00FFFF;
+        }
+
+        /* Objeto central de horas */
+        .hours-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #333;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            width: 200px;
+            text-align: center;
+        }
+
+        .hours-container h3 {
+            font-size: 22px;
+            color: #00FFFF;
+            margin: 10px 0;
+        }
+
+        .hours-container p {
+            font-size: 18px;
+            color: #fff;
+            margin: 0;
+        }
+
+        /* Linha separadora no objeto de horas */
+        .separator {
+            border-bottom: 1px solid #00FFFF;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        /* Labels abaixo dos gauges */
+        .labels-container {
+            display: flex;
+            justify-content: space-around;
+            width: 80%;
+            margin-top: 20px;
+        }
+
+        .label-item {
+            text-align: center;
+            width: 150px;
+            margin-top: 10px;
+        }
+
+        .label-item h3 {
+            color: #00FFFF;
+            font-size: 20px;
+            margin: 0;
+        }
+
+        .label-item span {
+            color: #FFF;
+            font-size: 16px;
+        }
+
+        /* Seção inferior com gauges e ícones */
+        .bottom-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 80%;
+            margin-top: 20px;
+        }
+
+        .gauge-group {
+            display: flex;
+            justify-content: space-between;
+            width: 400px;
+        }
+
+        /* Botões centrais */
+        .icon-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            background-color: #333;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .icon {
+            background-color: #333;
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .icon svg {
+            fill: #00FFFF;
+            width: 30px;
+            height: 30px;
+        }
+
+        /* Tamanho ajustado para gauges menores */
+        .small-gauge-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            text-align: center;
+        }
+
+        .small-value {
+            position: absolute;
+            width: 100%;
+            top: 70%;
+            font-size: 20px;
+            font-weight: bold;
+            color: #00FFFF;
+        }
+
+        .small-label {
+            position: absolute;
+            width: 100%;
+            top: 105%;
+            font-size: 12px;
+            color: #00FFFF;
+        }
+
+        .small-unit {
+            position: absolute;
+            width: 100%;
+            top: 85%;
+            font-size: 12px;
+            color: #00FFFF;
+        }
+
+        .gauge-labels{
+            display: flex;
+            margin-top: 290px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Gauge Esquerda -->
+        <div class="gauge-container">
+            <div class="gauge-background"></div>
+            <canvas class="gauge" id="leftGauge" width="300" height="300"></canvas>
+            <div class="value" id="leftValue">401</div>
+            <div class="label">ENGINE SPEED</div>
+            <div class="unit">rpm</div>
+
+            <!-- Labels abaixo do gauge esquerdo -->
+            <div class="gauge-labels">
+                <div class="label-item">
+                    <h3 id="throttlePosLeft">THP</h3>
+                    <span>THROTTLE POSIT.</span>
+                </div>
+                <div class="label-item">
+                    <h3 id="relativeLoadLeft">401</h3>
+                    <span>RELATIVE LOAD</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Objeto Central (Horas) -->
+        <div class="hours-container">
+            <h3>PORT RUNNING HOURS</h3>
+            <p id="portHours">401 h</p>
+            <div class="separator"></div>
+            <h3>STBD RUNNING HOURS</h3>
+            <p id="stbdHours">500 h</p>
+        </div>
+
+        <!-- Gauge Direita -->
+        <div class="gauge-container">
+            <div class="gauge-background"></div>
+            <canvas class="gauge" id="rightGauge" width="300" height="300"></canvas>
+            <div class="value" id="rightValue">500</div>
+            <div class="label">ENGINE SPEED</div>
+            <div class="unit">rpm</div>
+
+            <!-- Labels abaixo do gauge direito -->
+            <div class="gauge-labels">
+                <div class="label-item">
+                    <h3 id="throttlePosRight">THP</h3> <!-- Corrigido -->
+                    <span>THROTTLE POSIT.</span>
+                </div>
+                <div class="label-item">
+                    <h3 id="relativeLoadRight">500</h3>
+                    <span>RELATIVE LOAD</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Parte inferior com gauges e ícones -->
+    <div class="bottom-section">
+        <!-- Grupo de Gauges no canto inferior esquerdo -->
+        <div class="gauge-group">
+            <!-- Oil Pressure -->
+            <div class="small-gauge-container">
+                <div class="gauge-background"></div>
+                <canvas class="gauge" id="oilPressureGaugeLeft" width="150" height="150"></canvas>
+                <div class="small-value" id="oilPressureValueLeft">401</div>
+                <div class="small-label">OIL PRESSURE</div>
+                <div class="small-unit">bar</div>
+            </div>
+
+            <!-- Coolant Temperature -->
+            <div class="small-gauge-container">
+                <div class="gauge-background"></div>
+                <canvas class="gauge" id="coolantTempGaugeLeft" width="150" height="150"></canvas>
+                <div class="small-value" id="coolantTempValueLeft">401</div>
+                <div class="small-label">COOLANT TEMPERATURE</div>
+                <div class="small-unit">°C</div>
+            </div>
+        </div>
+
+        <!-- Botões centrais -->
+        <div class="icon-container">
+            <!-- Botão 1 -->
+            <div class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+                    <circle cx="32" cy="32" r="30" stroke="#00FFFF" fill="none" stroke-width="4"/>
+                    <path d="M32 10 L32 54" stroke="#00FFFF" stroke-width="4" />
+                    <circle cx="32" cy="32" r="8" fill="#00FFFF" />
+                </svg>
+            </div>
+            <!-- Adicione outros ícones conforme necessário -->
+            <div class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+                    <circle cx="32" cy="32" r="30" stroke="#00FFFF" fill="none" stroke-width="4"/>
+                    <path d="M32 10 L32 54" stroke="#00FFFF" stroke-width="4" />
+                    <circle cx="32" cy="32" r="8" fill="#00FFFF" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Grupo de Gauges no canto inferior direito -->
+        <div class="gauge-group">
+            <!-- Oil Pressure -->
+            <div class="small-gauge-container">
+                <div class="gauge-background"></div>
+                <canvas class="gauge" id="oilPressureGaugeRight" width="150" height="150"></canvas>
+                <div class="small-value" id="oilPressureValueRight">500</div>
+                <div class="small-label">OIL PRESSURE</div>
+                <div class="small-unit">bar</div>
+            </div>
+
+            <!-- Coolant Temperature -->
+            <div class="small-gauge-container">
+                <div class="gauge-background"></div>
+                <canvas class="gauge" id="coolantTempGaugeRight" width="150" height="150"></canvas>
+                <div class="small-value" id="coolantTempValueRight">500</div>
+                <div class="small-label">COOLANT TEMPERATURE</div>
+                <div class="small-unit">°C</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function drawGauge(ctx, value, maxValue) {
+            ctx.clearRect(0, 0, 300, 300);
+    
+            // Círculo de fundo
+            ctx.beginPath();
+            ctx.arc(150, 150, 120, 0.75 * Math.PI, 2.25 * Math.PI);
+            ctx.strokeStyle = '#00BFFF';
+            ctx.lineWidth = 10;
+            ctx.stroke();
+    
+            // Marcas externas (principais)
+            ctx.lineWidth = 2;
+            for (let i = 0; i <= 10; i++) {
+                const angle = (i / 10) * 1.5 * Math.PI + 0.75 * Math.PI;
+                ctx.beginPath();
+                ctx.moveTo(150 + Math.cos(angle) * 100, 150 + Math.sin(angle) * 100);
+                ctx.lineTo(150 + Math.cos(angle) * 120, 150 + Math.sin(angle) * 120);
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.stroke();
+    
+                const textValue = i * (maxValue / 10);
+                ctx.font = "12px Arial";
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillText(textValue, 150 + Math.cos(angle) * 80 - 10, 150 + Math.sin(angle) * 80 + 5);
+            }
+    
+            // Marcas internas (menores)
+            for (let i = 0; i <= 50; i++) {
+                if (i % 5 !== 0) {
+                    const angle = (i / 50) * 1.5 * Math.PI + 0.75 * Math.PI;
+                    ctx.beginPath();
+                    ctx.moveTo(150 + Math.cos(angle) * 110, 150 + Math.sin(angle) * 110);
+                    ctx.lineTo(150 + Math.cos(angle) * 120, 150 + Math.sin(angle) * 120);
+                    ctx.strokeStyle = '#00FFFF';
+                    ctx.stroke();
+                }
+            }
+    
+            // Desenhar o ponteiro
+            const angle = (value / maxValue) * 1.5 * Math.PI + 0.75 * Math.PI;
+            ctx.beginPath();
+            ctx.moveTo(150, 150);
+            ctx.lineTo(150 + Math.cos(angle) * 100, 150 + Math.sin(angle) * 100);
+            ctx.strokeStyle = '#00FFFF';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+    
+            // Pontinho no centro
+            ctx.beginPath();
+            ctx.arc(150, 150, 6, 0, 2 * Math.PI);
+            ctx.fillStyle = '#00FFFF';
+            ctx.fill();
+        }
+    
+        // Função para desenhar o gauge com ajustes para gauges menores
+        function drawSmallGauge(ctx, value, maxValue, gaugeRadius = 75) {
+            ctx.clearRect(0, 0, 150, 150);
+    
+            // Círculo de fundo
+            ctx.beginPath();
+            ctx.arc(gaugeRadius, gaugeRadius, gaugeRadius - 30, 0.75 * Math.PI, 2.25 * Math.PI);
+            ctx.strokeStyle = '#00BFFF';
+            ctx.lineWidth = 5;
+            ctx.stroke();
+    
+            // Marcas externas (principais)
+            ctx.lineWidth = 2;
+            for (let i = 0; i <= 10; i++) {
+                const angle = (i / 10) * 1.5 * Math.PI + 0.75 * Math.PI;
+                ctx.beginPath();
+                ctx.moveTo(gaugeRadius + Math.cos(angle) * (gaugeRadius - 20), gaugeRadius + Math.sin(angle) * (gaugeRadius - 20));
+                ctx.lineTo(gaugeRadius + Math.cos(angle) * gaugeRadius, gaugeRadius + Math.sin(angle) * gaugeRadius);
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.stroke();
+    
+                const textValue = i * (maxValue / 10);
+                ctx.font = "10px Arial";
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillText(textValue, gaugeRadius + Math.cos(angle) * (gaugeRadius - 40) - 5, gaugeRadius + Math.sin(angle) * (gaugeRadius - 40) + 5);
+            }
+    
+            // Marcas internas (menores)
+            for (let i = 0; i <= 50; i++) {
+                if (i % 5 !== 0) {
+                    const angle = (i / 50) * 1.5 * Math.PI + 0.75 * Math.PI;
+                    ctx.beginPath();
+                    ctx.moveTo(gaugeRadius + Math.cos(angle) * (gaugeRadius - 10), gaugeRadius + Math.sin(angle) * (gaugeRadius - 10));
+                    ctx.lineTo(gaugeRadius + Math.cos(angle) * gaugeRadius, gaugeRadius + Math.sin(angle) * gaugeRadius);
+                    ctx.strokeStyle = '#00FFFF';
+                    ctx.stroke();
+                }
+            }
+    
+            // Desenhar o ponteiro
+            const angle = (value / maxValue) * 1.5 * Math.PI + 0.75 * Math.PI;
+            ctx.beginPath();
+            ctx.moveTo(gaugeRadius, gaugeRadius);
+            ctx.lineTo(gaugeRadius + Math.cos(angle) * (gaugeRadius - 30), gaugeRadius + Math.sin(angle) * (gaugeRadius - 30));
+            ctx.strokeStyle = '#00FFFF';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+    
+            // Pontinho no centro
+            ctx.beginPath();
+            ctx.arc(gaugeRadius, gaugeRadius, 4, 0, 2 * Math.PI);
+            ctx.fillStyle = '#00FFFF';
+            ctx.fill();
+        }
+    
+        function updateGauges() {
+            const leftValue = 401;
+            const rightValue = 500;
+            const maxValue = 3000;
+    
+            const leftCanvas = document.getElementById('leftGauge');
+            const leftCtx = leftCanvas.getContext('2d');
+            drawGauge(leftCtx, leftValue, maxValue);
+    
+            const rightCanvas = document.getElementById('rightGauge');
+            const rightCtx = rightCanvas.getContext('2d');
+            drawGauge(rightCtx, rightValue, maxValue);
+    
+            // Gauges de pressão e temperatura do lado esquerdo
+            const oilPressureCanvasLeft = document.getElementById('oilPressureGaugeLeft');
+            const oilPressureCtxLeft = oilPressureCanvasLeft.getContext('2d');
+            drawSmallGauge(oilPressureCtxLeft, leftValue, 5); // Valor corrigido para pressão do óleo
+    
+            const coolantTempCanvasLeft = document.getElementById('coolantTempGaugeLeft');
+            const coolantTempCtxLeft = coolantTempCanvasLeft.getContext('2d');
+            drawSmallGauge(coolantTempCtxLeft, leftValue, 50); // Valor corrigido para temperatura do refrigerante
+    
+            // Gauges de pressão e temperatura do lado direito
+            const oilPressureCanvasRight = document.getElementById('oilPressureGaugeRight');
+            const oilPressureCtxRight = oilPressureCanvasRight.getContext('2d');
+            drawSmallGauge(oilPressureCtxRight, rightValue, 5); // Valor corrigido para pressão do óleo
+    
+            const coolantTempCanvasRight = document.getElementById('coolantTempGaugeRight');
+            const coolantTempCtxRight = coolantTempCanvasRight.getContext('2d');
+            drawSmallGauge(coolantTempCtxRight, rightValue, 50); // Valor corrigido para temperatura do refrigerante
+        }
+    
+        // Iniciar os gauges
+        updateGauges();
+    </script>
+    
+</body>
+</html>
